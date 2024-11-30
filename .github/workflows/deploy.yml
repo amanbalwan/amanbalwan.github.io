@@ -15,9 +15,18 @@ on:
       - "**.yml"
       - "Gemfile"
       - "Gemfile.lock"
-      - "!.github/workflows/**"
+      - "!.github/workflows/axe.yml"
+      - "!.github/workflows/broken-links.yml"
+      - "!.github/workflows/deploy-docker-tag.yml"
+      - "!.github/workflows/deploy-image.yml"
+      - "!.github/workflows/docker-slim.yml"
+      - "!.github/workflows/lighthouse-badger.yml"
+      - "!.github/workflows/prettier.yml"
       - "!lighthouse_results/**"
       - "!CONTRIBUTING.md"
+      - "!CUSTOMIZE.md"
+      - "!FAQ.md"
+      - "!INSTALL.md"
       - "!README.md"
   pull_request:
     branches:
@@ -33,38 +42,41 @@ on:
       - "**.yml"
       - "Gemfile"
       - "Gemfile.lock"
-      - "!.github/workflows/**"
+      - "!.github/workflows/axe.yml"
+      - "!.github/workflows/broken-links.yml"
+      - "!.github/workflows/deploy-docker-tag.yml"
+      - "!.github/workflows/deploy-image.yml"
+      - "!.github/workflows/docker-slim.yml"
+      - "!.github/workflows/lighthouse-badger.yml"
+      - "!.github/workflows/prettier.yml"
       - "!lighthouse_results/**"
       - "!CONTRIBUTING.md"
+      - "!CUSTOMIZE.md"
+      - "!FAQ.md"
+      - "!INSTALL.md"
       - "!README.md"
   workflow_dispatch:
 
 permissions:
-  contents: write # Allow GitHub Pages action to write to repository
+  contents: write
 
 jobs:
   deploy:
+    # available images: https://github.com/actions/runner-images#available-images
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Checkout code
       - name: Checkout 🛎️
         uses: actions/checkout@v4
-
-      # Step 2: Setup Ruby and install dependencies
       - name: Setup Ruby 💎
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2" # Updated to Ruby 3.2
+          ruby-version: "3.3.5"
           bundler-cache: true
-
-      # Step 3: Install dependencies (gems in Gemfile)
-      - name: Install dependencies 💎
-        run: |
-          gem install bundler # Ensure Bundler is installed
-          bundle install # Install all gems in the Gemfile (including Jekyll and plugins)
-
-      # Step 4: Update _config.yml (for dynamic config changes)
+      - name: Setup Python 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip" # caching pip dependencies
       - name: Update _config.yml ⚙️
         uses: fjogeleit/yaml-update-action@main
         with:
@@ -72,16 +84,17 @@ jobs:
           valueFile: "_config.yml"
           propertyPath: "giscus.repo"
           value: ${{ github.repository }}
-
-      # Step 5: Build Jekyll site
-      - name: Build Jekyll site 🔧
+      - name: Install and Build 🔧
         run: |
-          export JEKYLL_ENV=production  # Set production environment for Jekyll
-          bundle exec jekyll build  # Build the Jekyll site
-
-      # Step 6: Deploy to GitHub Pages
+          pip3 install --upgrade nbconvert
+          export JEKYLL_ENV=production
+          bundle exec jekyll build
+      - name: Purge unused CSS 🧹
+        run: |
+          npm install -g purgecss
+          purgecss -c purgecss.config.js
       - name: Deploy 🚀
-        if: github.event_name != 'pull_request' # Only deploy on push (not on PR)
+        if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: _site # Folder to deploy to GitHub Pages
+          folder: _site
