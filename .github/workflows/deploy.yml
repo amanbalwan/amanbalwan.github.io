@@ -84,6 +84,11 @@ jobs:
         run: |
           pip3 install --upgrade nbconvert
 
+      - name: Install dependencies 💎
+        run: |
+          gem install bundler # Ensure Bundler is installed
+          bundle install # Install all gems listed in Gemfile
+
       - name: Update _config.yml ⚙️
         uses: fjogeleit/yaml-update-action@main
         with:
