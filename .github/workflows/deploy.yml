@@ -59,7 +59,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3.5"
-          bundler-cache: false # Disable Bundler caching to force a fresh install
+          bundler-cache: false
 
       - name: Cache Ruby gems
         uses: actions/cache@v3
@@ -84,20 +84,19 @@ jobs:
         run: |
           pip3 install --upgrade nbconvert
 
-      - name: Install dependencies 💎
+      - name: Check if build is needed
+        id: check_build_needed
         run: |
-          gem install bundler # Ensure Bundler is installed
-          bundle install # Install all gems listed in Gemfile
-
-      - name: Update _config.yml ⚙️
-        uses: fjogeleit/yaml-update-action@main
-        with:
-          commitChange: false
-          valueFile: "_config.yml"
-          propertyPath: "giscus.repo"
-          value: ${{ github.repository }}
+          if git diff --quiet HEAD^ HEAD -- _site; then
+            echo "No changes detected, skipping build step."
+            echo "build_needed=false" >> $GITHUB_ENV
+          else
+            echo "Changes detected, proceeding with build."
+            echo "build_needed=true" >> $GITHUB_ENV
+        continue-on-error: true
 
       - name: Install and Build 🔧
+        if: env.build_needed == 'true'
         run: |
           export JEKYLL_ENV=production
           bundle exec jekyll build
@@ -108,7 +107,7 @@ jobs:
           purgecss -c purgecss.config.js
 
       - name: Deploy 🚀
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' # Skip deploy for PRs
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: _site
