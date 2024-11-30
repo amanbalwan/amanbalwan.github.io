@@ -55,22 +55,23 @@ jobs:
       - name: Setup Ruby 💎
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.0" # Update to a stable Ruby version
-          bundler-cache: true
+          ruby-version: "3.0" # Update to a stable Ruby version (check Ruby compatibility)
+          bundler-cache: true # Enable caching of Bundler gems to speed up builds
 
       # Step 3: Install dependencies (gems in Gemfile)
       - name: Install dependencies 💎
         run: |
-          bundle install  # Ensure all gems, including jekyll, are installed
+          gem install bundler # Ensure Bundler is installed
+          bundle install # Install all gems in the Gemfile (including Jekyll and plugins)
 
-      # Step 4: Setup Python (if needed for additional tasks)
+      # Step 4: Setup Python (if needed for additional tasks like Jupyter notebooks)
       - name: Setup Python 🐍
         uses: actions/setup-python@v5
         with:
           python-version: "3.9" # Adjust Python version if needed
-          cache: "pip" # Caching Python dependencies (if relevant to the project)
+          cache: "pip" # Cache Python dependencies (if relevant)
 
-      # Step 5: Update _config.yml (e.g., for giscus integration)
+      # Step 5: Update _config.yml (e.g., for giscus integration or dynamic config changes)
       - name: Update _config.yml ⚙️
         uses: fjogeleit/yaml-update-action@main
         with:
@@ -80,17 +81,16 @@ jobs:
           value: ${{ github.repository }}
 
       # Step 6: Build Jekyll site
-      - name: Install and Build Jekyll 🔧
+      - name: Build Jekyll site 🔧
         run: |
-          pip3 install --upgrade nbconvert  # Only needed if using nbconvert
           export JEKYLL_ENV=production  # Set production environment for Jekyll
           bundle exec jekyll build  # Build the Jekyll site
 
-      # Step 7: Optional Purge CSS step (if you're using PurgeCSS)
+      # Step 7: Optional Purge CSS step (only if you're using PurgeCSS to minimize CSS)
       - name: Purge unused CSS 🧹
         run: |
-          npm install -g purgecss  # Install PurgeCSS
-          purgecss -c purgecss.config.js  # Run PurgeCSS if you're using it
+          npm install -g purgecss  # Install PurgeCSS globally
+          purgecss -c purgecss.config.js  # Run PurgeCSS to remove unused CSS classes
 
       # Step 8: Deploy to GitHub Pages
       - name: Deploy 🚀
