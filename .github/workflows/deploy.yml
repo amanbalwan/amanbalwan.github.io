@@ -55,7 +55,7 @@ jobs:
       - name: Setup Ruby 💎
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.0" # Update to a stable Ruby version (check Ruby compatibility)
+          ruby-version: "3.2" # Updated to Ruby 3.2 (compatible with activesupport 8.0.0)
           bundler-cache: true # Enable caching of Bundler gems to speed up builds
 
       # Step 3: Install dependencies (gems in Gemfile)
