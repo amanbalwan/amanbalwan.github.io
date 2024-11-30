@@ -4,6 +4,7 @@ group :jekyll_plugins do
     gem 'jekyll'
     gem 'jekyll-archives'
     gem 'jekyll-email-protect'
+    gem 'faraday-retry'
     gem 'jekyll-feed'
     gem 'jekyll-get-json'
     gem 'jekyll-imagemagick'
