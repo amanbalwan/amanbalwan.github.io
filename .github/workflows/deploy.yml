@@ -96,10 +96,10 @@ jobs:
         continue-on-error: true
 
       - name: Install and Build 🔧
-        if: env.build_needed == 'true'
         run: |
           export JEKYLL_ENV=production
           bundle exec jekyll build
+        continue-on-error: true
 
       - name: Purge unused CSS 🧹
         run: |
